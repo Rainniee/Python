@@ -1,0 +1,38 @@
+ps. 首先确保已经安装了scikit-learn 的Python包 
+    conda install scikit-learn 或 pip install sklearn
+ps. Python中实现线性回归的主流包是scikit-learn
+    import sklearn
+    from sklearn import linear_model
+    lm = linear_model.LinearRegression()   #训练模型
+    model = lm.fit(X,y)  #用fit()进行回归
+
+---------------------------------------------------------------------------------------------------------------------------------------
+**  使用iris数据集 
+import pandas
+iris = pandasread_csv('http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data',header=None)
+iris.columns = ['SepalLengthCm','SepalWidthCm','PetalLengthCm','PetalWidthCm','Species']
+iris.sample(10)
+
+---------------------------------------------------------------------------------------------------------------------------------------
+**  绘图
+import seaborn
+%matplotlib inline 
+seaborn.regplot(x='PetalLengthCm',y='PetalWidthCm',data=iris)  #通过画图可以直观地对数据的线性关系做一个观察
+
+---------------------------------------------------------------------------------------------------------------------------------------
+**  训练模型
+from sklearn import linear_model
+lm = linear_model.LinearRegression()
+features = ['PetalLengthCm']
+X = iris[features]
+y = iris['PetalWidthCm']
+print(X.shape,y.shape)
+
+features = ['PetalLengthCm','SepalLengthCm']  #放入两个特征,X就会多一个维度
+model = lm.fit(X,y)                           #使用X，y来训练model
+print(model.intercept_,model.coef_)           #从print的结果可以得到回归模型的截距和系数
+
+---------------------------------------------------------------------------------------------------------------------------------------
+**  预测数据
+model.predict(4)  #使用model来对数据进行预测，输入X自变量的值，输出y的预测值
+model.predict([1,2])  #注意多个自变量时的情况
