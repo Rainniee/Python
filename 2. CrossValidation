@@ -1,0 +1,24 @@
+#  交叉检验
+为将数据样本切割成较小的子集 一部分用于训练模型 一部分用于验证模型（训练集的规模比验证集的规模大得多）
+利用验证集来测试训练得到的模型 主要用于评估模型的性能
+通过模型在训练集上的表现和在验证集上的表现差异来评估模型的泛化能力和最终确定模型
+
+#  交叉检验 VS 随机划分
+随机划分：一部分的训练集永远划分在测试集中
+交叉检验：将数据划分成若干份 每次用不同的部分作为测试集 则每份都被当做测试集和训练集使用过
+
+#  回归常用的打分函数
+   MAE：对应的scoring参数为’neg_mean_absolute_error’
+   MSE：对应的scoring参数为’neg_mean_squared_error’ 
+   得分越高，则代表模型的性能越好
+  
+#  sklearn中进行交叉检验
+from sklearn.model_selection import corss_val_score 
+scores = -cross_val_score(lm,X,y,cv=5,scoring='neg_mean_absolute_error')
+                             # 得到5次交叉检验的误差
+                             # 这里cross_val_score()前面用了负号，得到的是每个回归模型的平均绝对值误差
+print(scores)
+import numpy as np
+print(np.mean(scores))       # 求平均值 作为误差结果
+
+ps. 可添加、删除变量 从而得到对于预测目标变量最有帮助的变量组
