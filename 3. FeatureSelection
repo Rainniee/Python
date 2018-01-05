@@ -1,0 +1,87 @@
+#  特征选择
+特征选择 = 特征子集选择 Feature Subset Selection (FSS) = 属性选择 Attribute Selection 
+指从已有的M个特征中选择N个特征使得系统的特定指标最优化
+是从原始特征中选择出一些最有效特征以降低数据集维度的过程
+是模式识别中关键的数据预处理步骤
+
+#  特征选择 方法：
+** 数据驱动
+   分析手上已有的训练数据 得出哪些x里面的特征对预测y最重要的
+   主要的三大种类方法如下：
+     1. 相关性：考察在已有的数据里面的特征x与预测值y的相关度
+     2. 迭代删除（增加）：确定要使用哪个算法后 选择最合适的训练子集 从而使得模型的效果最好
+     3. 基于模型：通过随机森林等可以直接得出每个训练特征的重要性的模型
+                 或者是在进行预测时加入的一些正则化调整 引起的对特征的筛选 从而挑选出最重要的特征
+** 领域专家：通过相关领域的专家知识和经验来挑选特征
+
+---------------------------------------------------------------------------------------------------------------------------------------
+#  相关性系数：皮尔逊系数
+** 皮尔逊积矩相关系数 皮尔森相关系数r
+Pearson product-moment correlation coefficient (PPMCC)  (PCCs) 文章中常用 r 或 Pearson’s r表示
+用于度量两个变量X和Y之间的相关（线性相关） 其值介于-1与1之间
+在自然科学领域中 该系数广泛用于度量两个变量之间的相关程度
+
+** Python实现：
+from scipy.stats.stats import pearsonr
+pearsonr(x,y)
+
+---------------------------------------------------------------------------------------------------------------------------------------
+#  迭代特征选择
+** 解决问题：假设我们已经确定了要使用哪个算法后 如何知道哪个X的子集合作为特征训练模型效果最好
+
+** 解决方案：
+1. 递增： 
+   初始化：X’ = 空集，X” = X 
+   For Xi in X” : 
+        X’ + Xi 作为特征集合训练 
+   选所有Xi中训练得到模型最好的x’ 
+   X’ = X’ + x’ 
+   X” = X” - x’ 
+                 迭代直到新加入任何特征模型性能都无提升
+2. 递减： 
+   初始化：X’ = X 
+   For Xi in X’: 
+        X’ - Xi 作为特征集合训练 
+   选所 Xi中训练得到模型最好的x’ 
+   X’ = X’ - x’ 
+                 迭代直到去除任何特征模型性能都会下降
+
+---------------------------------------------------------------------------------------------------------------------------------------
+** 迭代特征选择python实现：
+import pandas
+import numpy as np
+from sklearn import linear_model
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import LabelEncoder
+
+iris = pandas.read_csv('http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data',header=None)
+iris.columns = ['SepalLengthCm','SepalWidthCm','PetalLengthCm','PetalWidthCm','Species']
+le = LabelEncoder()
+le.fit(iris['Species'])
+lm = linear_model.LogisticRegression()
+features = ['PetalLengthCm','PetalWidthCm','SepalLengthCm','SepalWidthCm']
+y = le.transform(iris['Species'])
+
+selected_features = []
+rest_features = features[:]
+best_acc = 0
+while len(rest_features) > 0:
+    temp_best_i = ''
+    temp_best_acc = 0
+    for feature_i in rest_features:
+        temp_features = selected_features + [feature_i,]
+        X = iris[temp_features]
+        scores = cross_val_score(lm,X,y,cv=5,scoring='accuracy')
+        acc = np.mean(scores)
+        if acc > temp_best_acc:
+            temp_best_acc = acc
+            temp_best_i = feature_i
+    print("select",temp_best_i,"acc:",temp_best_acc)
+    if temp_best_acc > best_acc:
+        best_acc = temp_best_acc
+        selected_features += [temp_best_i,]
+        rest_features.remove(temp_best_i)
+    else:
+        break
+print("best feature set: ",selected_features,"acc: ",best_acc)   
+        
